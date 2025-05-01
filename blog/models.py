@@ -5,15 +5,39 @@ from django.db.models import Count
 
 
 class PostQuerySet(models.QuerySet):
+    """
+    Более гибкая альтернатива annotate(comments_count=Count(...)).
 
-    def year(self, year):
-        posts_at_year = self.filter(published_at__year=year).order_by('published_at')
-        return posts_at_year
+    Полезно, когда:
+     - Уже применены prefetch_related или другие сложные фильтры.
+     - Нужно избежать лишних JOIN'ов или конфликтов в ORM.
+     - Хочешь добавить поле вручную к уже полученным объектам.
+    """
+    
+    def popular(self):
+        popular_tag = self.annotate(likes_count=Count('likes')).order_by('-likes_count')
+        
+        return popular_tag
+
+
+    def fetch_with_comments_count(self):
+        posts = self
+        post_ids = [post.id for post in posts]
+        posts_with_comments = Post.objects.filter(id__in=post_ids) \
+            .annotate(comments_count=Count('comments', distinct=True))
+        ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
+        count_for_id = dict(ids_and_comments)
+        
+        for post in posts:
+            post.comments_count = count_for_id[post.id]
+        
+        return posts
 
 
 class TagQuerySet(models.QuerySet):
     def popular(self):
         popular_tag = self.annotate(posts_count=Count('posts')).order_by('-posts_count')
+        
         return popular_tag
 
 
@@ -92,3 +116,4 @@ class Comment(models.Model):
         ordering = ['published_at']
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
+
