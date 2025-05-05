@@ -18,7 +18,7 @@ def serialize_post_optimized(post):
         'published_at': post.published_at,
         'slug': post.slug,
         'tags': [serialize_tag(tag) for tag in tags],
-        'first_tag_title': tags[0].title if tags else '',
+        'first_tag_title': tags.first().title if tags.first() else '',
     }
 
 
