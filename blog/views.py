@@ -3,10 +3,6 @@ from blog.models import Comment, Post, Tag
 from django.db.models import Count, Prefetch
 
 
-def get_related_posts_count(tag):
-    return tag.posts.count()
-
-
 def serialize_post_optimized(post):
     tags = post.tags.all()
     first_tag = tags.first()
