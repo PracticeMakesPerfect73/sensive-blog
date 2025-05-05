@@ -47,7 +47,6 @@ class Post(models.Model):
     slug = models.SlugField('Название в виде url', max_length=200)
     image = models.ImageField('Картинка')
     published_at = models.DateTimeField('Дата и время публикации')
-    objects = PostQuerySet.as_manager()
 
     author = models.ForeignKey(
         User,
@@ -75,24 +74,27 @@ class Post(models.Model):
         verbose_name = 'пост'
         verbose_name_plural = 'посты'
 
+    objects = PostQuerySet.as_manager()
+
 
 class Tag(models.Model):
     title = models.CharField('Тег', max_length=20, unique=True)
-    objects = TagQuerySet.as_manager()
-
-    def __str__(self):
-        return self.title
-
-    def clean(self):
-        self.title = self.title.lower()
-
-    def get_absolute_url(self):
-        return reverse('tag_filter', args={'tag_title': self.slug})
 
     class Meta:
         ordering = ['title']
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('tag_filter', args={'tag_title': self.slug})
+
+    def clean(self):
+        self.title = self.title.lower()
+
+    objects = TagQuerySet.as_manager()
 
 
 class Comment(models.Model):
@@ -116,4 +118,3 @@ class Comment(models.Model):
         ordering = ['published_at']
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
-
