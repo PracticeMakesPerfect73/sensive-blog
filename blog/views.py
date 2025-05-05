@@ -9,6 +9,7 @@ def get_related_posts_count(tag):
 
 def serialize_post_optimized(post):
     tags = post.tags.all()
+    first_tag = tags.first()
     return {
         'title': post.title,
         'teaser_text': post.text[:200],
@@ -18,7 +19,7 @@ def serialize_post_optimized(post):
         'published_at': post.published_at,
         'slug': post.slug,
         'tags': [serialize_tag(tag) for tag in tags],
-        'first_tag_title': tags.first().title if tags.first() else '',
+        'first_tag_title': first_tag,
     }
 
 
@@ -64,7 +65,7 @@ def post_detail(request, slug):
         slug=slug
     )
 
-    comments = Comment.objects.filter(post=post).select_related('author')
+    comments = post.comments.select_related('author')
 
     serialized_comments = [{
         'text': comment.text,
