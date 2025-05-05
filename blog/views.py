@@ -5,7 +5,7 @@ from django.db.models import Count, Prefetch
 
 def serialize_post_optimized(post):
     tags = post.tags.all()
-    first_tag = tags.first()
+    first_tag = tags.first() if tags else ''
     return {
         'title': post.title,
         'teaser_text': post.text[:200],
