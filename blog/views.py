@@ -47,10 +47,7 @@ def index(request):
 def post_detail(request, slug):
     post = get_object_or_404(
         Post.objects.select_related('author')
-            .prefetch_related(
-                'likes',
-                Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')))
-            ),
+            .prefetch_with_tags_and_authors(),
         slug=slug
     )
 
@@ -99,9 +96,7 @@ def tag_filter(request, tag_title):
 
     related_posts = tag.posts.annotate(comments_count=Count('comments')) \
         .select_related('author') \
-        .prefetch_related(
-            Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')))
-        )[:20]
+        .prefetch_with_tags_and_authors()[:20]
 
     context = {
         'tag': tag.title,
